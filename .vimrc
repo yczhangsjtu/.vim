@@ -20,9 +20,9 @@ endif
 nnoremap <up> gk
 nnoremap <down> gj
 
-inoremap ;; <esc>
+inoremap mj <esc>
 inoremap <esc> <nop>
-vnoremap ;; <esc>
+vnoremap mj <esc>
 vnoremap <esc> <nop>
 
 let mapleader = " "
@@ -30,7 +30,9 @@ noremap - ddp
 inoremap <c-u> <esc>viwUA
 nnoremap <c-u> viwU
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>em :vsplit ~/.vim/plugin/move.vim<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
+nnoremap <leader>sm :source ~/.vim/plugin/move.vim<cr>
 nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
 nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
 vnoremap " <esc>`>a"<esc>`<i"<esc>

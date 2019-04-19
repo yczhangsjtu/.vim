@@ -17,11 +17,23 @@ function! Replace()
     execute(':%s/\<math\.pi\>/Mathf.PI/g')
     execute(':%s/\<Duration\>/TimeSpan/g')
     execute(':%s/\<Map\>/Dictionary/g')
+    execute(':%s/\<Set\>/HashSet/g')
     execute(':%s/\<Future\>/Promise/g')
     execute(':%s/\<Iterable\>/IEnumerable/g')
+    execute(':%s/\<EdgeInsetsGeometry\>/EdgeInsets/g')
     execute(':%s/\<static const\>/const/g')
+    execute(':%s/\<ValueKey<\w\+>\zs\ze(/.key/g')
+    execute(':%s/((\w\+ \w\+)\zs\ze { =>/g')
     execute(':%s/\<float.infinity\>/float\.PositiveInfinity/g')
     execute(':%s/(\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
+    execute(':%s/\.isNotEmpty\zs\ze)/()/g')
+    execute(':%s/\.isEmpty\zs\ze)/()/g')
+    execute(':%s/\.\zssubstring\ze(/Substring/g')
+    execute(':%s/\.\zscontainsKey\ze(/ContainsKey/g')
+    execute(':%s/\.\zscontains\ze(/Contains/g')
+    execute(':%s/\.\zsadd\ze(/Add/g')
+    execute(':%s/\.\zsremove\ze(/Remove/g')
+    execute(':%s/\.\zstoUpperCase\ze()/ToUpper/g')
     execute(':%s/(\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
     execute(':%s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
     execute(':%s/\<centerStart\>/centerLeft/g')
@@ -30,10 +42,12 @@ function! Replace()
     execute(':%s/\<TimeSpan(milliseconds: \(\d\+\))/TimeSpan(0, 0, 0, 0, \1)/g')
     execute(':%s/\<TimeSpan(seconds: \(\d\+\))/TimeSpan(0, 0, 0, \1)/g')
     execute(':%s/^\s*\zsclass \(\a\+\)\ze\>/public class \1')
+    execute(':%s/^\s*\zs\zeabstract class \a\+\>/public ')
+    execute(':%s/@override\n\s*/public override /')
     execute(':%s/^\s*\zsfinal \(\S\+\) \(\w\+\)\ze;$/public readonly \1 \2')
     execute(':%s/^\s*\zs\<final\> \ze//')
+    execute(':%s/^\s*\<public override\zs final\ze\>//')
     execute(':%s/^\s*\/\/.*$\n//')
-    execute(':%s/@override\n\s*/public override /')
     execute(':%s/\(\d\+\.\d\+\)\>/\1f/g')
     execute(':%s/const _\(\w\+\)({/public _\1(')
     execute(':%s/const \(\w\+\)({/public \1(')
@@ -62,12 +76,15 @@ function! Replace()
     execute(':%s/^\s*D.assert(.*)\zs,\ze$/;/')
     execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
     execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
+    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\)\(<[^>]*>\)\?(/new /g')
     execute(':%s/: (.*)\zs\ze {$/ =>')
     execute(':%s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
     execute(':%s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
     execute(':%s/^\s*\zspublic\ze override void performLayout() {$/protected/')
-    execute(':%s/^\s*\zsconst\ze \(Color\|TimeSpan\|Curve\) \w\+ = /static readonly/')
+    execute(':%s/^\s*\zsconst\ze \(Color\|TimeSpan\|Icon\|Curve\|Dictionary<[a-zA-Z_<>]\+,\s*[a-zA-Z_<>]\+>\|Set<[a-zA-Z_<>]*>\|List<[a-zA-Z_<>]*>\) \w\+ = /static readonly/')
     execute(':%s/= GlobalKey<\w\+>\zs\ze()/.key')
+    execute(':%s/= \zs\ze<[a-zA-Z_<>]\+, [a-zA-Z_<>]\+>\s*{/new Dictionary')
+    execute(':%s/^\s*[a-zA-Z_<>]\+ \zsget \(\w\+\);\ze$/\1 { get; }')
 endfunction
 " }}}
 
@@ -99,6 +116,10 @@ function! AddBrace()
         execute(":normal! gg/" . pattern . "/e\<cr>o}\<esc>?:\<esc>xs{\<cr>\<esc>")
     endwhile
     let pattern = 'public \w\+(\n\([^()]\+\n\)*\s*);'
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
+    endwhile
+    let pattern = ') : base(.*);$'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
     endwhile
@@ -175,11 +196,11 @@ function! ClearDoubleDots()
 endfunction
 
 function! ClearThis()
-    let pattern = '^\s*public \w\+(\n\([^()]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^()]*\n\)*\s*)'
+    let pattern = '^\s*public \w\+(\n\([^:;{}]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^:;{}]*\n\)*\s*)'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>")
         let word = expand("<cword>")
-        let newpattern = '^\s*public readonly \zs\S\+\ze ' . word . ';'
+        let newpattern = '^\s*public \(readonly \)\?\zs\S\+\ze ' . word . ';'
         execute(":normal! gg/" . newpattern . "\<cr>")
         let type = expand("<cWORD>")
         execute(":normal! gg/" . pattern . "\<cr>")
@@ -218,6 +239,52 @@ function! ClearConcatString()
     endwhile
 endfunction
 
+function! AddSet()
+    let pattern = '[:=]\s*\zs\ze<[a-zA-Z_<>]\+>\s*{'
+    while search(pattern) !=# 0
+        execute(":normal! gg/" . pattern . "\<cr>inew HashSet(new List\<esc>wvf{F>yf{%a)\<esc>%P")
+    endwhile
+endfunction
+
+function! CorrectDictionaryPair()
+    execute(':s/:/,')
+    execute(":normal! 0wi{\<esc>$")
+    let c = matchstr(getline('.'), '\%'.col('.').'c.')
+    if c ==# ','
+        execute(":normal! i}\<esc>")
+    else
+        execute(":normal! a}\<esc>")
+    endif
+endfunction
+
+function! AddNull()
+    execute(':normal! $')
+    let c = matchstr(getline('.'), '\%'.col('.').'c.')
+    if c ==# ','
+        execute(":normal! i = null\<esc>")
+    else
+        execute(":normal! a = null\<esc>")
+    endif
+endfunction
+
+function! DeleteParensisPair()
+    execute(":normal! hf(bdwmq%x`qx")
+endfunction
+
+function! ToGet()
+    execute(":normal! $b")
+    let word = expand('<cword>')
+    let line = getline('.')
+    execute(":normal! yy$s {\<cr>get { return this._" . word . "; }\<cr>}\<cr>" . line . "\<esc>")
+    execute(':s/\<' . word . '\>/_' . word . '/')
+    execute(':s/public //')
+endfunction
+
+function! Initialize()
+    execute(":normal! g'<yg'>/}\<cr>kpV/}\<cr>k\<esc>")
+    execute(":'<,'>" . 's/^\s*\zs\S\+\s\+\(\w\+\)\s*=.*\ze/this.\1 = \1;')
+endfunction
+
 function! Move()
     call ClearBase()
     call PublicConstructor()
@@ -231,9 +298,15 @@ function! Move()
     call ClearThis()
     call GetHashCode()
     call ClearConcatString()
+    call AddSet()
 endfunction
 
 nnoremap <leader>move :call Move()<cr>
 nnoremap <leader>o :call ReplaceWithBaseClass()<cr>
 nnoremap <leader>r :call Replace()<cr>
 nnoremap <leader>a :call AddUtil()<cr>
+nnoremap <leader>d :call CorrectDictionaryPair()<cr>
+nnoremap <leader>n :call AddNull()<cr>
+nnoremap <leader>p :call DeleteParensisPair()<cr>
+nnoremap <leader>g :call ToGet()<cr>
+nnoremap <leader>i :call Initialize()<cr>
