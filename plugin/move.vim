@@ -23,11 +23,15 @@ function! Replace()
     execute(':%s/\<EdgeInsetsGeometry\>/EdgeInsets/g')
     execute(':%s/\<static const\>/const/g')
     execute(':%s/\<ValueKey<\w\+>\zs\ze(/.key/g')
+    execute(':%s/\<TextAlign.start\>/TextAlign.left/g')
     execute(':%s/((\w\+ \w\+)\zs\ze { =>/g')
     execute(':%s/\<float.infinity\>/float\.PositiveInfinity/g')
     execute(':%s/(\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
     execute(':%s/\.isNotEmpty\zs\ze)/()/g')
     execute(':%s/\.isEmpty\zs\ze)/()/g')
+    execute(':%s/\.isFinite\zs\ze)/()/g')
+    execute(':%s/\.\<Keys\.Contains\>/.ContainsKey/g')
+    execute(':%s/\.\<Values\.Contains\>/.ContainsValue/g')
     execute(':%s/\.\zssubstring\ze(/Substring/g')
     execute(':%s/\.\zscontainsKey\ze(/ContainsKey/g')
     execute(':%s/\.\zscontains\ze(/Contains/g')
@@ -37,6 +41,7 @@ function! Replace()
     execute(':%s/(\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
     execute(':%s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
     execute(':%s/\<centerStart\>/centerLeft/g')
+    execute(':%s/\<inMilliseconds\>/Milliseconds/g')
     execute(':%s/\<Tween<float>/FloatTween/g')
     execute(':%s/\<Tween<Offset>/OffsetTween/g')
     execute(':%s/\<TimeSpan(milliseconds: \(\d\+\))/TimeSpan(0, 0, 0, 0, \1)/g')
@@ -54,7 +59,7 @@ function! Replace()
     execute(':%s/}) : /) : ')
     execute(':%s/\zsconst \ze\w\+\.\w\+(//')
     execute(':%s/: \zsconst\ze \w\+(/new')
-    execute(':%s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze\w\+\(<\w\+>\)\?(/new /')
+    execute(':%s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
     execute(':%s/<\(\w\+\)>\[/new List<\1>[')
     execute(':%s/\zs\[\ze[^\]]*$/{')
     execute(':%s/^[^\[]*\zs\]\ze/}')
@@ -76,7 +81,7 @@ function! Replace()
     execute(':%s/^\s*D.assert(.*)\zs,\ze$/;/')
     execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
     execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
-    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\)\(<[^>]*>\)\?(/new /g')
+    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\)\(<[^>]*>\)\?(/new /g')
     execute(':%s/: (.*)\zs\ze {$/ =>')
     execute(':%s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
     execute(':%s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
@@ -115,7 +120,7 @@ function! AddBrace()
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "/e\<cr>o}\<esc>?:\<esc>xs{\<cr>\<esc>")
     endwhile
-    let pattern = 'public \w\+(\n\([^()]\+\n\)*\s*);'
+    let pattern = 'public \w\+(\n\([^:;{}]\+\n\)*\s*);'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
     endwhile
@@ -135,11 +140,15 @@ endfunction
 function! Getters()
     let pattern = '^\s*\w\+ get \w\+ => .\+;'
     while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>ipublic \<esc>/get\<cr>dwwxxxi{\<cr>get {\<cr>return \<esc>o}\<cr>}\<esc>")
+        execute(":normal! gg/" . pattern . "\<cr>ipublic \<esc>/" . '\<get' . "\<cr>dwwxxxi{\<cr>get {\<cr>return \<esc>o}\<cr>}\<esc>")
     endwhile
     let pattern = '^\s*@override \w\+ get \w\+ => .\+;'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>wdWipublic override \<esc>/get\<cr>dwwxxxi{\<cr>get {\<cr>return \<esc>o}\<cr>}\<esc>")
+    endwhile
+    let pattern = '^\s*\S\+ \zsget \w\+ {'
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "\<cr>dwf{%mq%oget {\<cr>\<esc>`qO}\<esc>")
     endwhile
 endfunction
 
@@ -157,7 +166,7 @@ function! ClearRequired()
     while location !=# 0
         execute(":normal! gg/" . pattern . "/e\<cr>")
         let word = expand("<cword>")
-        let newpattern = pattern . '\(^[^()]\+\n\)*\s*).*{\n\([^{}]\+\n\)*\s*D\.assert(' . word . " != null"
+        let newpattern = pattern . '\(^[^:;{}]\+\n\)*\s*).*{\n\([^{}]\+\n\)*\s*D\.assert(' . word . " != null"
         execute(":normal! gg")
         let newlocation = search(newpattern)
         if newlocation ==# location
@@ -180,7 +189,7 @@ function! ClearComma()
 endfunction
 
 function! ClearDoubleDots()
-    let pattern = '^\s*\w\+\n\?\(\s*\.\.\w\+ = \w\+\n\?\)\+;'
+    let pattern = '^\s*\w\+\n\?\(\s*\.\.\w\+ = [0-9a-zA-Z_.(),]\+\n\?\)\+;'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>")
         let word = expand("<cword>")
@@ -285,6 +294,18 @@ function! Initialize()
     execute(":'<,'>" . 's/^\s*\zs\S\+\s\+\(\w\+\)\s*=.*\ze/this.\1 = \1;')
 endfunction
 
+function! ClearInitializer()
+    execute(":normal! yymp/}\<cr>kp")
+    execute(':s/^\s*\zs\S\+\s\+\(\w\+\)\s*=\s*\(.*[^,]\),\?\ze/this.\1 = \1 ?? \2;')
+    execute("normal! `p$")
+    let c = matchstr(getline('.'), '\%'.col('.').'c.')
+    if c ==# ','
+        execute("normal! dT=i null")
+    else
+        execute("normal! F=lDa null")
+    endif
+endfunction
+
 function! Move()
     call ClearBase()
     call PublicConstructor()
@@ -310,3 +331,4 @@ nnoremap <leader>n :call AddNull()<cr>
 nnoremap <leader>p :call DeleteParensisPair()<cr>
 nnoremap <leader>g :call ToGet()<cr>
 nnoremap <leader>i :call Initialize()<cr>
+nnoremap <leader>ci :call ClearInitializer()<cr>
