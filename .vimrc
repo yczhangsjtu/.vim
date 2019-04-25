@@ -20,9 +20,7 @@ endif
 nnoremap <up> gk
 nnoremap <down> gj
 
-inoremap mj <esc>
 inoremap <esc> <nop>
-vnoremap mj <esc>
 vnoremap <esc> <nop>
 
 let mapleader = " "
