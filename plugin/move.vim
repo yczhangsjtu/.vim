@@ -1,97 +1,109 @@
 " Replace() ------------------ {{{
 function! Replace()
-    execute(':%s/\<super\>/base/g')
-    execute(':%s/\<assert\>/D.assert/g')
-    execute(':%s/\<toList\>/ToList/g')
-    execute(':%s/\<String\>/string/g')
-    execute(':%s/\<toString\>/ToString/g')
-    execute(':%s/\<extends\>/:/')
-    execute(':%s/\<double\>/float/g')
-    execute(':%s/\<DoubleProperty\>/FloatProperty/g')
-    execute(':%s/\<math\.max\>/Mathf.Max/g')
-    execute(':%s/\<math\.min\>/Mathf.Min/g')
-    execute(':%s/\<math\.asin\>/Mathf.Asin/g')
-    execute(':%s/\<math\.acos\>/Mathf.Acos/g')
-    execute(':%s/\<math\.sqrt\>/Mathf.Sqrt/g')
-    execute(':%s/\<math\.pow\>/Mathf.Pow/g')
-    execute(':%s/\<math\.pi\>/Mathf.PI/g')
-    execute(':%s/\<Duration\>/TimeSpan/g')
-    execute(':%s/\<Map\>/Dictionary/g')
-    execute(':%s/\<Set\>/HashSet/g')
-    execute(':%s/\<Future\>/Promise/g')
-    execute(':%s/\<Iterable\>/IEnumerable/g')
-    execute(':%s/\<EdgeInsetsGeometry\>/EdgeInsets/g')
-    execute(':%s/\<static const\>/const/g')
-    execute(':%s/\<ValueKey<\w\+>\zs\ze(/.key/g')
-    execute(':%s/\<TextAlign.start\>/TextAlign.left/g')
-    execute(':%s/((\w\+ \w\+)\zs\ze { =>/g')
-    execute(':%s/\<float.infinity\>/float\.PositiveInfinity/g')
-    execute(':%s/(\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
-    execute(':%s/\.isNotEmpty\zs\ze)/()/g')
-    execute(':%s/\.isEmpty\zs\ze)/()/g')
-    execute(':%s/\.isFinite\zs\ze)/()/g')
-    execute(':%s/\.\<Keys\.Contains\>/.ContainsKey/g')
-    execute(':%s/\.\<Values\.Contains\>/.ContainsValue/g')
-    execute(':%s/\.\zssubstring\ze(/Substring/g')
-    execute(':%s/\.\zscontainsKey\ze(/ContainsKey/g')
-    execute(':%s/\.\zscontains\ze(/Contains/g')
-    execute(':%s/\.\zsadd\ze(/Add/g')
-    execute(':%s/\.\zsremove\ze(/Remove/g')
-    execute(':%s/\.\zstoUpperCase\ze()/ToUpper/g')
-    execute(':%s/(\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
-    execute(':%s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
-    execute(':%s/\<centerStart\>/centerLeft/g')
-    execute(':%s/\<inMilliseconds\>/Milliseconds/g')
-    execute(':%s/\<Tween<float>/FloatTween/g')
-    execute(':%s/\<Tween<Offset>/OffsetTween/g')
-    execute(':%s/\<TimeSpan(milliseconds: \(\d\+\))/TimeSpan(0, 0, 0, 0, \1)/g')
-    execute(':%s/\<TimeSpan(seconds: \(\d\+\))/TimeSpan(0, 0, 0, \1)/g')
-    execute(':%s/^\s*\zsclass \(\a\+\)\ze\>/public class \1')
-    execute(':%s/^\s*\zs\zeabstract class \a\+\>/public ')
-    execute(':%s/@override\n\s*/public override /')
-    execute(':%s/^\s*\zsfinal \(\S\+\) \(\w\+\)\ze;$/public readonly \1 \2')
-    execute(':%s/^\s*\zs\<final\> \ze//')
-    execute(':%s/^\s*\<public override\zs final\ze\>//')
-    execute(':%s/^\s*\/\/.*$\n//')
-    execute(':%s/\(\d\+\.\d\+\)\>/\1f/g')
-    execute(':%s/const _\(\w\+\)({/public _\1(')
-    execute(':%s/const \(\w\+\)({/public \1(')
-    execute(':%s/}) : /) : ')
-    execute(':%s/\zsconst \ze\w\+\.\w\+(//')
-    execute(':%s/: \zsconst\ze \w\+(/new')
-    execute(':%s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
-    execute(':%s/<\(\w\+\)>\[/new List<\1>[')
-    execute(':%s/\zs\[\ze[^\]]*$/{')
-    execute(':%s/^[^\[]*\zs\]\ze/}')
-    execute(':%s/''/"/g')
-    execute(':%s/\zs,\ze\n\(\s*\)}/')
-    execute(':%s/\zs,\ze\n\(\s*\))/')
-    execute(':%s/\zs,\ze\n\(\s*\)\]/')
-    execute(':%s/\(setState(\|onPressed: \|onTap:\)()\zs \ze{/ => /')
-    execute(':%s/\S\+ createState() => \(\S\+\)();$/State createState() => new \1();/')
-    execute(':%s/public \w\+(\([^)]\|\n\)*\zs}\ze);//')
-    execute(':%s/public \w\+(\([^)]\|\n\)*)\zs;\ze/ {}/')
-    execute(':%s/color: \zsColor\ze(/new Color/g')
-    execute(':%s/= \zs\(Color\|TextStyle\)\ze(/new \1/g')
-    execute(':%s/new List<\(\w\+\)>\[\([^]]*\)\]/new List<\1>{\2}/')
-    execute(':%s/^\s*\(@required\)\? \zsthis\.\zechild,$/Widget /')
-    execute(':%s/^\s*\(@required\)\? \zsthis\.\ze\(color\|backgroundColor\),$/Color /')
-    execute(':%s/^\s*\(@required\)\? \zsthis\.\ze\(axisDirection\),$/AxisDirection /')
-    execute(':%s/^\s*\(@required\)\? \zsthis\.\ze\(alignment\),$/Alignment /')
-    execute(':%s/^\s*D.assert(.*)\zs,\ze$/;/')
-    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
-    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
-    execute(':%s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\)\(<[^>]*>\)\?(/new /g')
-    execute(':%s/: (.*)\zs\ze {$/ =>')
-    execute(':%s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
-    execute(':%s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
-    execute(':%s/^\s*\zspublic\ze override void performLayout() {$/protected/')
-    execute(':%s/^\s*\zsconst\ze \(Color\|TimeSpan\|Icon\|Curve\|Dictionary<[a-zA-Z_<>]\+,\s*[a-zA-Z_<>]\+>\|Set<[a-zA-Z_<>]*>\|List<[a-zA-Z_<>]*>\) \w\+ = /static readonly/')
-    execute(':%s/= GlobalKey<\w\+>\zs\ze()/.key')
-    execute(':%s/= \zs\ze<[a-zA-Z_<>]\+, [a-zA-Z_<>]\+>\s*{/new Dictionary')
-    execute(':%s/^\s*[a-zA-Z_<>]\+ \zsget \(\w\+\);\ze$/\1 { get; }')
+    execute(':silent! %s/\<super\>/base/g')
+    execute(':silent! %s/\<assert\>/D.assert/g')
+    execute(':silent! %s/\<toList\>/ToList/g')
+    execute(':silent! %s/\<String\>/string/g')
+    execute(':silent! %s/\<toString\>/ToString/g')
+    execute(':silent! %s/\<extends\>/:/')
+    execute(':silent! %s/\<double\>/float/g')
+    execute(':silent! %s/\<DoubleProperty\>/FloatProperty/g')
+    execute(':silent! %s/\<math\.max\>/Mathf.Max/g')
+    execute(':silent! %s/\<math\.min\>/Mathf.Min/g')
+    execute(':silent! %s/\<math\.asin\>/Mathf.Asin/g')
+    execute(':silent! %s/\<math\.acos\>/Mathf.Acos/g')
+    execute(':silent! %s/\<math\.sqrt\>/Mathf.Sqrt/g')
+    execute(':silent! %s/\<math\.pow\>/Mathf.Pow/g')
+    execute(':silent! %s/\<math\.pi\>/Mathf.PI/g')
+    execute(':silent! %s/\<Duration\>/TimeSpan/g')
+    execute(':silent! %s/\<Map\>/Dictionary/g')
+    execute(':silent! %s/\<Set\>/HashSet/g')
+    execute(':silent! %s/\<Future\>/Promise/g')
+    execute(':silent! %s/\<Iterable\>/IEnumerable/g')
+    execute(':silent! %s/\<EdgeInsetsGeometry\>/EdgeInsets/g')
+    execute(':silent! %s/\<static const\>/const/g')
+    execute(':silent! %s/\<ValueKey<\w\+>\zs\ze(/.key/g')
+    execute(':silent! %s/\<TextAlign.start\>/TextAlign.left/g')
+    execute(':silent! %s/((\w\+ \w\+)\zs\ze { =>/g')
+    execute(':silent! %s/\<float.infinity\>/float\.PositiveInfinity/g')
+    execute(':silent! %s/(\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
+    execute(':silent! %s/\.isNotEmpty\zs\ze)/()/g')
+    execute(':silent! %s/\.isEmpty\zs\ze)/()/g')
+    execute(':silent! %s/\.isFinite\zs\ze)/()/g')
+    execute(':silent! %s/\.\<Keys\.Contains\>/.ContainsKey/g')
+    execute(':silent! %s/\<lerpDouble\>/MathUtils.lerpFloat/g')
+    execute(':silent! %s/\<runtimeType\>/GetType()/g')
+    execute(':silent! %s/\.\<Values\.Contains\>/.ContainsValue/g')
+    execute(':silent! %s/\.\zssubstring\ze(/Substring/g')
+    execute(':silent! %s/\.\zscontainsKey\ze(/ContainsKey/g')
+    execute(':silent! %s/\.\zscontains\ze(/Contains/g')
+    execute(':silent! %s/\.\zsadd\ze(/Add/g')
+    execute(':silent! %s/\.\zsremove\ze(/Remove/g')
+    execute(':silent! %s/\.\zstoUpperCase\ze()/ToUpper/g')
+    execute(':silent! %s/(\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
+    execute(':silent! %s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
+    execute(':silent! %s/\<centerStart\>/centerLeft/g')
+    execute(':silent! %s/\<inMilliseconds\>/Milliseconds/g')
+    execute(':silent! %s/\<Tween<float>/FloatTween/g')
+    execute(':silent! %s/\<Tween<Offset>/OffsetTween/g')
+    execute(':silent! %s/\<TimeSpan(milliseconds: \(\d\+\))/TimeSpan(0, 0, 0, 0, \1)/g')
+    execute(':silent! %s/\<TimeSpan(seconds: \(\d\+\))/TimeSpan(0, 0, 0, \1)/g')
+    execute(':silent! %s/^\s*\zsclass \(\a\+\)\ze\>/public class \1')
+    execute(':silent! %s/^\s*\zs\zeabstract class \a\+\>/public ')
+    execute(':silent! %s/@override\n\s*/public override /')
+    execute(':silent! %s/^\s*\zsfinal \(\S\+\) \(\w\+\)\ze;$/public readonly \1 \2')
+    execute(':silent! %s/^\s*\zs\<final\> \ze//')
+    execute(':silent! %s/^\s*\<public override\zs final\ze\>//')
+    execute(':silent! %s/^\s*\/\/.*$\n//')
+    execute(':silent! %s/\(\d\+\.\d\+\)\>/\1f/g')
+    execute(':silent! %s/const _\(\w\+\)({/public _\1(')
+    execute(':silent! %s/const \(\w\+\)({/public \1(')
+    execute(':silent! %s/}) : /) : ')
+    execute(':silent! %s/\zsconst \ze\w\+\.\w\+(//')
+    execute(':silent! %s/: \zsconst\ze \w\+(/new')
+    execute(':silent! %s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
+    execute(':silent! %s/<\(\w\+\)>\[/new List<\1>[')
+    execute(':silent! %s/\zs\[\ze[^\]]*$/{')
+    execute(':silent! %s/^[^\[]*\zs\]\ze/}')
+    execute(':silent! %s/''/"/g')
+    execute(':silent! %s/\zs,\ze\n\(\s*\)}/')
+    execute(':silent! %s/\zs,\ze\n\(\s*\))/')
+    execute(':silent! %s/\zs,\ze\n\(\s*\)\]/')
+    execute(':silent! %s/\(setState(\|onPressed: \|onTap:\)()\zs \ze{/ => /')
+    execute(':silent! %s/\S\+ createState() => \(\S\+\)();$/State createState() => new \1();/')
+    execute(':silent! %s/public \w\+(\([^)]\|\n\)*\zs}\ze);//')
+    execute(':silent! %s/public \w\+(\([^)]\|\n\)*)\zs;\ze/ {}/')
+    execute(':silent! %s/color: \zsColor\ze(/new Color/g')
+    execute(':silent! %s/= \zs\(Color\|TextStyle\)\ze(/new \1/g')
+    execute(':silent! %s/new List<\(\w\+\)>\[\([^]]*\)\]/new List<\1>{\2}/')
+    execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\zechild,$/Widget /')
+    execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(color\|backgroundColor\),$/Color /')
+    execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(axisDirection\),$/AxisDirection /')
+    execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(alignment\),$/Alignment /')
+    execute(':silent! %s/^\s*D.assert(.*)\zs,\ze$/;/')
+    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
+    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
+    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\)\(<[^>]*>\)\?(/new /g')
+    execute(':silent! %s/: (.*)\zs\ze {$/ =>')
+    execute(':silent! %s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
+    execute(':silent! %s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
+    execute(':silent! %s/^\s*\zspublic\ze override void performLayout() {$/protected/')
+    execute(':silent! %s/^\s*\zsconst\ze \(Color\|TimeSpan\|Icon\|Curve\|Dictionary<[a-zA-Z_<>]\+,\s*[a-zA-Z_<>]\+>\|Set<[a-zA-Z_<>]*>\|List<[a-zA-Z_<>]*>\) \w\+ = /static readonly/')
+    execute(':silent! %s/= GlobalKey<\w\+>\zs\ze()/.key')
+    execute(':silent! %s/= \zs\ze<[a-zA-Z_<>]\+, [a-zA-Z_<>]\+>\s*{/new Dictionary')
+    execute(':silent! %s/^\s*[a-zA-Z_<>]\+ \zsget \(\w\+\);\ze$/\1 { get; }')
 endfunction
 " }}}
+
+let s:typenamePattern = '[0-9a-zA-Z_<>,]\+'
+let s:assignmentPattern = '= [0-9a-zA-Z_.(),]\+'
+let s:functionParamDeclPattern = '\(' . s:typenamePattern . ' \|this.\)\w\+'
+let s:functionParamPattern = s:functionParamDeclPattern . '\( ' . s:assignmentPattern . '\)\?'
+let s:functionParamListPattern = '\(\(\s*' . s:functionParamPattern . ',\n\?\)*\(\s*' . s:functionParamPattern . '\n\?\)\)\?'
+let s:functionModifierPattern = '\(public \|private \|protected \)\?\(static \|override \)\?'
+let s:functionHeaderPattern = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\n\?' . s:functionParamListPattern . '\s*)\s*{'
+let s:functionHeaderWithOpenBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\zs{\ze\n\?' . s:functionParamListPattern . '\s*}\?)\s*{'
+let s:functionHeaderWithCloseBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+({\?\n\?' . s:functionParamListPattern . '\s*\zs}\ze)\s*{'
 
 function! AddUtil()
     let classname = substitute(expand('%:t:r'), '\(\<\|_\)\([a-z]\)', '\u\2', 'g') . "Utils"
@@ -99,13 +111,21 @@ function! AddUtil()
 endfunction
 
 function! ClearBraces()
-    let pattern = '\(^\s*public \w\+({\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+(\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+({\n\([^)]\+\n\)*\s*)\)'
+    let pattern = s:functionHeaderWithOpenBrace
     while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>")
-        execute(":s/{//")
-        execute(":normal! %")
-        execute(":s/}//")
+        execute(":normal! gg/" . pattern . "\<cr>x")
     endwhile
+    let pattern = s:functionHeaderWithCloseBrace
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "\<cr>x")
+    endwhile
+    " let pattern = '\(^\s*public \w\+({\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+(\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+({\n\([^)]\+\n\)*\s*)\)'
+    " while search(pattern) != 0
+    "     execute(":normal! gg/" . pattern . "\<cr>")
+    "     execute(":s/{//")
+    "     execute(":normal! %")
+    "     execute(":s/}//")
+    " endwhile
 endfunction
 
 function! ClearBase()
@@ -171,10 +191,10 @@ function! ClearRequired()
         let newlocation = search(newpattern)
         if newlocation ==# location
             execute(":normal! " . location . "gg")
-            execute(":s/@required //")
+            execute(":silent! s/@required //")
         else
             execute(":normal! " . location . "gg")
-            execute(":s/@required /required /")
+            execute(":silent! s/@required /required /")
         endif
         execute(":normal! gg")
         let location = search(pattern)
@@ -183,8 +203,10 @@ endfunction
 
 function! ClearComma()
     try
-        execute(':%s/^\s*D\.assert(.*)\zs,\ze$/;/')
-        execute(':%s/^\s*\w\+ = \w\+\zs,\ze$/;/')
+        execute(':silent! %s/^\s*D\.assert(.*)\zs,\ze$/;/')
+        execute(':silent! %s/^\s*\w\+ = \w\+\zs,\ze$/;/')
+    catch /.*/
+        echom "Cannot find comma to clear"
     endtry
 endfunction
 
@@ -195,7 +217,7 @@ function! ClearDoubleDots()
         let word = expand("<cword>")
         execute(":normal! dd")
         while 1
-            execute(':s/\.\./' . word . "./")
+            execute(':silent! s/\.\./' . word . "./")
             if getline(line('.'))[-1:] ==# ';'
                 break
             endif
@@ -213,7 +235,7 @@ function! ClearThis()
         execute(":normal! gg/" . newpattern . "\<cr>")
         let type = expand("<cWORD>")
         execute(":normal! gg/" . pattern . "\<cr>")
-        execute(':s/\<this\>\./' . type . " ")
+        execute(':silent! s/\<this\>\./' . type . " ")
     endwhile
 endfunction
 
@@ -222,7 +244,7 @@ function! RenderObject()
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>")
         let word = expand("<cword>")
-        execute(':s/\<' . word . ' renderObject/RenderObject _renderObject/')
+        execute(':silent! s/\<' . word . ' renderObject/RenderObject _renderObject/')
         execute(":normal! o" . word . " renderObject = _renderObject as " . word . ";\<esc>")
     endwhile
 endfunction
@@ -238,6 +260,31 @@ function! GetHashCode()
     let pattern = '^\s*public override int \zsget\ze hashCode => .*;$'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>dwsGetH\<esc>whxxs() {\<cr>return \<esc>o}")
+    endwhile
+    let pattern = '^\s*public override int \zsget\ze hashCode {$'
+    while search(pattern) !=# 0
+        execute(":normal! gg/" . pattern . "\<cr>dwsGetH\<esc>whi()\<esc>}")
+    endwhile
+    let pattern = '^\s*return hashValues(\n\(\s*\w\+,\n\)*\s*\w\+\n\s*);'
+    while search(pattern) !=# 0
+        execute(":normal! gg/" . pattern . "\<cr>ddivar hashCode = this.\<esc>$")
+        let c = matchstr(getline('.'), '\%'.col('.').'c.')
+        if c ==# ','
+            execute(":normal! r;i.GetHashCode()\<esc>j$")
+        else
+            execute(":normal! a.GetHashCode();\<esc>j$")
+        endif
+        while 1
+            let c = matchstr(getline('.'), '\%'.col('.').'c.')
+            if c ==# ';'
+                break
+            elseif c ==# ','
+                execute(":normal! bihashCode = (hashCode * 397) ^ this.\<esc>$i.GetHashCode()\<esc>lr;j$")
+            else
+                execute(":normal! bihashCode = (hashCode * 397) ^ this.\<esc>$a.GetHashCode();\<esc>j$")
+            endif
+        endwhile
+        execute(":normal! ddOreturn hashCode;\<esc>")
     endwhile
 endfunction
 
@@ -256,7 +303,7 @@ function! AddSet()
 endfunction
 
 function! CorrectDictionaryPair()
-    execute(':s/:/,')
+    execute(':silent! s/:/,')
     execute(":normal! 0wi{\<esc>$")
     let c = matchstr(getline('.'), '\%'.col('.').'c.')
     if c ==# ','
@@ -285,8 +332,8 @@ function! ToGet()
     let word = expand('<cword>')
     let line = getline('.')
     execute(":normal! yy$s {\<cr>get { return this._" . word . "; }\<cr>}\<cr>" . line . "\<esc>")
-    execute(':s/\<' . word . '\>/_' . word . '/')
-    execute(':s/public //')
+    execute(':silent! s/\<' . word . '\>/_' . word . '/')
+    execute(':silent! s/public //')
 endfunction
 
 function! Initialize()
@@ -296,7 +343,7 @@ endfunction
 
 function! ClearInitializer()
     execute(":normal! yymp/}\<cr>kp")
-    execute(':s/^\s*\zs\S\+\s\+\(\w\+\)\s*=\s*\(.*[^,]\),\?\ze/this.\1 = \1 ?? \2;')
+    execute(':silent! s/^\s*\zs\S\+\s\+\(\w\+\)\s*=\s*\(.*[^,]\),\?\ze/this.\1 = \1 ?? \2;')
     execute("normal! `p$")
     let c = matchstr(getline('.'), '\%'.col('.').'c.')
     if c ==# ','

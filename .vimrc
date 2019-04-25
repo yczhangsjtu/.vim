@@ -20,9 +20,6 @@ endif
 nnoremap <up> gk
 nnoremap <down> gj
 
-inoremap <esc> <nop>
-vnoremap <esc> <nop>
-
 let mapleader = " "
 noremap - ddp
 inoremap <c-u> <esc>viwUA
