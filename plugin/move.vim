@@ -1,13 +1,14 @@
 " Replace() ------------------ {{{
 function! Replace()
     execute(':silent! %s/\<super\>/base/g')
-    execute(':silent! %s/\<assert\>/D.assert/g')
+    execute(':silent! %s/[^.]\zs\<assert\>\ze/D.assert/g')
     execute(':silent! %s/\<toList\>/ToList/g')
     execute(':silent! %s/\<String\>/string/g')
     execute(':silent! %s/\<toString\>/ToString/g')
     execute(':silent! %s/\<extends\>/:/')
     execute(':silent! %s/\<double\>/float/g')
     execute(':silent! %s/\<DoubleProperty\>/FloatProperty/g')
+    execute(':silent! %s/\<lerpDouble\>/MathUtils.lerpFloat/g')
     execute(':silent! %s/\<math\.max\>/Mathf.Max/g')
     execute(':silent! %s/\<math\.min\>/Mathf.Min/g')
     execute(':silent! %s/\<math\.asin\>/Mathf.Asin/g')
@@ -24,23 +25,22 @@ function! Replace()
     execute(':silent! %s/\<static const\>/const/g')
     execute(':silent! %s/\<ValueKey<\w\+>\zs\ze(/.key/g')
     execute(':silent! %s/\<TextAlign.start\>/TextAlign.left/g')
-    execute(':silent! %s/((\w\+ \w\+)\zs\ze { =>/g')
+    execute(':silent! %s/((\w\+ \w\+)\zs\ze {/ =>/g')
     execute(':silent! %s/\<float.infinity\>/float\.PositiveInfinity/g')
-    execute(':silent! %s/(\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
-    execute(':silent! %s/\.isNotEmpty\zs\ze)/()/g')
-    execute(':silent! %s/\.isEmpty\zs\ze)/()/g')
-    execute(':silent! %s/\.isFinite\zs\ze)/()/g')
+    execute(':silent! %s/([^.]\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
+    execute(':silent! %s/\.isNotEmpty\zs\ze[^(])/()/g')
+    execute(':silent! %s/\.isEmpty\zs\ze[^(])/()/g')
+    execute(':silent! %s/\.isFinite\zs\ze[^(])/()/g')
     execute(':silent! %s/\.\<Keys\.Contains\>/.ContainsKey/g')
-    execute(':silent! %s/\<lerpDouble\>/MathUtils.lerpFloat/g')
-    execute(':silent! %s/\<runtimeType\>/GetType()/g')
     execute(':silent! %s/\.\<Values\.Contains\>/.ContainsValue/g')
-    execute(':silent! %s/\.\zssubstring\ze(/Substring/g')
     execute(':silent! %s/\.\zscontainsKey\ze(/ContainsKey/g')
+    execute(':silent! %s/\<runtimeType\>/GetType()/g')
+    execute(':silent! %s/\.\zssubstring\ze(/Substring/g')
     execute(':silent! %s/\.\zscontains\ze(/Contains/g')
-    execute(':silent! %s/\.\zsadd\ze(/Add/g')
+    execute(':silent! %s/\(properties\|description\)\@<!\.\zsadd\ze(/Add/g')
     execute(':silent! %s/\.\zsremove\ze(/Remove/g')
     execute(':silent! %s/\.\zstoUpperCase\ze()/ToUpper/g')
-    execute(':silent! %s/(\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
+    execute(':silent! %s/([^.]\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
     execute(':silent! %s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
     execute(':silent! %s/\<centerStart\>/centerLeft/g')
     execute(':silent! %s/\<inMilliseconds\>/Milliseconds/g')
@@ -56,12 +56,11 @@ function! Replace()
     execute(':silent! %s/^\s*\<public override\zs final\ze\>//')
     execute(':silent! %s/^\s*\/\/.*$\n//')
     execute(':silent! %s/\(\d\+\.\d\+\)\>/\1f/g')
-    execute(':silent! %s/const _\(\w\+\)({/public _\1(')
     execute(':silent! %s/const \(\w\+\)({/public \1(')
     execute(':silent! %s/}) : /) : ')
     execute(':silent! %s/\zsconst \ze\w\+\.\w\+(//')
     execute(':silent! %s/: \zsconst\ze \w\+(/new')
-    execute(':silent! %s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
+    execute(':silent! %s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze\(Equals\)\@!_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
     execute(':silent! %s/<\(\w\+\)>\[/new List<\1>[')
     execute(':silent! %s/\zs\[\ze[^\]]*$/{')
     execute(':silent! %s/^[^\[]*\zs\]\ze/}')
@@ -73,8 +72,6 @@ function! Replace()
     execute(':silent! %s/\S\+ createState() => \(\S\+\)();$/State createState() => new \1();/')
     execute(':silent! %s/public \w\+(\([^)]\|\n\)*\zs}\ze);//')
     execute(':silent! %s/public \w\+(\([^)]\|\n\)*)\zs;\ze/ {}/')
-    execute(':silent! %s/color: \zsColor\ze(/new Color/g')
-    execute(':silent! %s/= \zs\(Color\|TextStyle\)\ze(/new \1/g')
     execute(':silent! %s/new List<\(\w\+\)>\[\([^]]*\)\]/new List<\1>{\2}/')
     execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\zechild,$/Widget /')
     execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(color\|backgroundColor\),$/Color /')
@@ -83,7 +80,7 @@ function! Replace()
     execute(':silent! %s/^\s*D.assert(.*)\zs,\ze$/;/')
     execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
     execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
-    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\)\(<[^>]*>\)\?(/new /g')
+    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\|Color\)\(<[^>]*>\)\?(/new /g')
     execute(':silent! %s/: (.*)\zs\ze {$/ =>')
     execute(':silent! %s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
     execute(':silent! %s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
@@ -95,6 +92,7 @@ function! Replace()
 endfunction
 " }}}
 
+" Patterns --------------- {{{
 let s:typenamePattern = '[0-9a-zA-Z_<>,]\+'
 let s:assignmentPattern = '= [0-9a-zA-Z_.(),]\+'
 let s:functionParamDeclPattern = '\(' . s:typenamePattern . ' \|this.\)\w\+'
@@ -104,12 +102,16 @@ let s:functionModifierPattern = '\(public \|private \|protected \)\?\(static \|o
 let s:functionHeaderPattern = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\n\?' . s:functionParamListPattern . '\s*)\s*{'
 let s:functionHeaderWithOpenBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\zs{\ze\n\?' . s:functionParamListPattern . '\s*}\?)\s*{'
 let s:functionHeaderWithCloseBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+({\?\n\?' . s:functionParamListPattern . '\s*\zs}\ze)\s*{'
+" }}}
 
+" AddUtil() ------------------ {{{
 function! AddUtil()
     let classname = substitute(expand('%:t:r'), '\(\<\|_\)\([a-z]\)', '\u\2', 'g') . "Utils"
     execute(':normal! gg/^\s*namespace' . "\<esc>oclass " . classname . " {\<cr>}\<esc>")
 endfunction
+" }}}
 
+" ClearBraces() ------------------ {{{
 function! ClearBraces()
     let pattern = s:functionHeaderWithOpenBrace
     while search(pattern) != 0
@@ -127,14 +129,18 @@ function! ClearBraces()
     "     execute(":s/}//")
     " endwhile
 endfunction
+" }}}
 
+" ClearBase() ------------------ {{{
 function! ClearBase()
     let pattern = ':\(\s*\(D.assert(.*)\|\w\+ = \w\+\)\(,\|;\)\n\)\+\s*base(.*);$'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>/base(.*);\<cr>dt;mq?:\<cr>a \<esc>pla{\<cr>\<esc>`qs}\<esc>")
     endwhile
 endfunction
+" }}}
 
+" AddBrace() ------------------ {{{
 function! AddBrace()
     let pattern = ':\(\s*\(D.assert(.*)\|\w\+ = \w\+\)\(,\|;\)\n\)\+$'
     while search(pattern) != 0
@@ -149,14 +155,18 @@ function! AddBrace()
         execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
     endwhile
 endfunction
+" }}}
 
+" PublicConstructor() ------------------ {{{
 function! PublicConstructor()
     let pattern = '^\s*class.*{\n\s*\w\+('
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>jwipublic \<esc>")
     endwhile
 endfunction
+" }}}
 
+" Getters() ------------------ {{{
 function! Getters()
     let pattern = '^\s*\w\+ get \w\+ => .\+;'
     while search(pattern) != 0
@@ -171,14 +181,18 @@ function! Getters()
         execute(":normal! gg/" . pattern . "\<cr>dwf{%mq%oget {\<cr>\<esc>`qO}\<esc>")
     endwhile
 endfunction
+" }}}
 
+" Setters() ------------------ {{{
 function! Setters()
     let pattern = '^\s*set \w\+(.\+) {$'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>wwmp#$%kmq`pdt{V$%d`qp")
     endwhile
 endfunction
+" }}}
 
+" ClearRequired() ------------------ {{{
 function! ClearRequired()
     let pattern = '@required.*\zs\<\(\w\+\)\ze,\?\n'
     execute(":normal! gg")
@@ -200,7 +214,9 @@ function! ClearRequired()
         let location = search(pattern)
     endwhile
 endfunction
-
+" }}}
+"
+" ClearComma() ------------------ {{{
 function! ClearComma()
     try
         execute(':silent! %s/^\s*D\.assert(.*)\zs,\ze$/;/')
@@ -209,7 +225,9 @@ function! ClearComma()
         echom "Cannot find comma to clear"
     endtry
 endfunction
+" }}}
 
+" ClearDoubleDots() ------------------ {{{
 function! ClearDoubleDots()
     let pattern = '^\s*\w\+\n\?\(\s*\.\.\w\+ = [0-9a-zA-Z_.(),]\+\n\?\)\+;'
     while search(pattern) !=# 0
@@ -225,7 +243,9 @@ function! ClearDoubleDots()
         endwhile
     endwhile
 endfunction
+" }}}
 
+" ClearThis() ------------------ {{{
 function! ClearThis()
     let pattern = '^\s*public \w\+(\n\([^:;{}]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^:;{}]*\n\)*\s*)'
     while search(pattern) !=# 0
@@ -238,7 +258,9 @@ function! ClearThis()
         execute(':silent! s/\<this\>\./' . type . " ")
     endwhile
 endfunction
+" }}}
 
+" RenderObject() ------------------ {{{
 function! RenderObject()
     let pattern = '^\s*public override void updateRenderObject(BuildContext context, \zs_\w\+\ze renderObject) {$'
     while search(pattern) !=# 0
@@ -248,14 +270,18 @@ function! RenderObject()
         execute(":normal! o" . word . " renderObject = _renderObject as " . word . ";\<esc>")
     endwhile
 endfunction
+" }}}
 
+" ReplaceWithBaseClass() ------------------ {{{
 function! ReplaceWithBaseClass()
     let type = expand("<cword>")
     execute(":normal! mqw")
     let word = expand("<cword>")
     execute(":normal! i_\<esc>o" . type . " " . word . " = _" . word . " as " . type . ";\<esc>`q")
 endfunction
+" }}}
 
+" GetHashCode() ------------------ {{{
 function! GetHashCode()
     let pattern = '^\s*public override int \zsget\ze hashCode => .*;$'
     while search(pattern) !=# 0
@@ -287,21 +313,27 @@ function! GetHashCode()
         execute(":normal! ddOreturn hashCode;\<esc>")
     endwhile
 endfunction
+" }}}
 
+" ClearConcatString() ------------------ {{{
 function! ClearConcatString()
     let pattern = '"[^"]*"\n\s*"[^"]*"'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>A +\<esc>")
     endwhile
 endfunction
+" }}}
 
+" AddSet() ------------------ {{{
 function! AddSet()
     let pattern = '[:=]\s*\zs\ze<[a-zA-Z_<>]\+>\s*{'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>inew HashSet(new List\<esc>wvf{F>yf{%a)\<esc>%P")
     endwhile
 endfunction
+" }}}
 
+" CorrectDictionaryPair() ------------------ {{{
 function! CorrectDictionaryPair()
     execute(':silent! s/:/,')
     execute(":normal! 0wi{\<esc>$")
@@ -312,7 +344,9 @@ function! CorrectDictionaryPair()
         execute(":normal! a}\<esc>")
     endif
 endfunction
+" }}}
 
+" AddNull() ------------------ {{{
 function! AddNull()
     execute(':normal! $')
     let c = matchstr(getline('.'), '\%'.col('.').'c.')
@@ -322,11 +356,15 @@ function! AddNull()
         execute(":normal! a = null\<esc>")
     endif
 endfunction
+" }}}
 
+" DeleteParensisPair() ------------------ {{{
 function! DeleteParensisPair()
     execute(":normal! hf(bdwmq%x`qx")
 endfunction
+" }}}
 
+" ToGet() ------------------ {{{
 function! ToGet()
     execute(":normal! $b")
     let word = expand('<cword>')
@@ -335,12 +373,16 @@ function! ToGet()
     execute(':silent! s/\<' . word . '\>/_' . word . '/')
     execute(':silent! s/public //')
 endfunction
+" }}}
 
+" Initialize() ------------------ {{{
 function! Initialize()
     execute(":normal! g'<yg'>/}\<cr>kpV/}\<cr>k\<esc>")
     execute(":'<,'>" . 's/^\s*\zs\S\+\s\+\(\w\+\)\s*=.*\ze/this.\1 = \1;')
 endfunction
+" }}}
 
+" ClearInitializer() ------------------ {{{
 function! ClearInitializer()
     execute(":normal! yymp/}\<cr>kp")
     execute(':silent! s/^\s*\zs\S\+\s\+\(\w\+\)\s*=\s*\(.*[^,]\),\?\ze/this.\1 = \1 ?? \2;')
@@ -352,7 +394,9 @@ function! ClearInitializer()
         execute("normal! F=lDa null")
     endif
 endfunction
+" }}}
 
+" Move() ------------------ {{{
 function! Move()
     call ClearBase()
     call PublicConstructor()
@@ -368,7 +412,9 @@ function! Move()
     call ClearConcatString()
     call AddSet()
 endfunction
+" }}}
 
+" Maps ---------------- {{{
 nnoremap <leader>move :call Move()<cr>
 nnoremap <leader>o :call ReplaceWithBaseClass()<cr>
 nnoremap <leader>r :call Replace()<cr>
@@ -379,3 +425,4 @@ nnoremap <leader>p :call DeleteParensisPair()<cr>
 nnoremap <leader>g :call ToGet()<cr>
 nnoremap <leader>i :call Initialize()<cr>
 nnoremap <leader>ci :call ClearInitializer()<cr>
+" }}}
