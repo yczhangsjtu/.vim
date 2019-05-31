@@ -1,3 +1,17 @@
+" Patterns --------------- {{{
+let s:typenamePattern = '[0-9a-zA-Z_<>,]\+'
+let s:assignmentPattern = '= [0-9a-zA-Z_.(),]\+'
+let s:functionParamDeclPattern = '\(' . s:typenamePattern . ' \|this.\)\w\+'
+let s:functionParamPattern = s:functionParamDeclPattern . '\( ' . s:assignmentPattern . '\)\?'
+let s:functionParamListPattern = '\(\(\s*' . s:functionParamPattern . ',\n\?\)*\(\s*' . s:functionParamPattern . '\n\?\)\)\?'
+let s:functionModifierPattern = '\(public \|private \|protected \|static \|override \)*'
+let s:functionHeaderPattern = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\n\?' . s:functionParamListPattern . '\s*)\s*{'
+let s:functionHeaderWithOpenBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\zs{\ze\n\?' . s:functionParamListPattern . '\s*}\?)\s*{'
+let s:functionHeaderWithCloseBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+({\?\n\?' . s:functionParamListPattern . '\s*\zs}\ze)\s*{'
+let s:constructorHeaderWithOpenBrace = '^\s*' . s:functionModifierPattern . '\s*\w\+(\zs{\ze\n\?' . s:functionParamListPattern . '\s*}\?)\s*\(:\s*base(.*)\s*\)\?{'
+let s:constructorHeaderWithCloseBrace = '^\s*' . s:functionModifierPattern . '\s*\w\+({\?\n\?' . s:functionParamListPattern . '\s*\zs}\ze)\s*\(:\s*base(.*)\s*\)\?{'
+" }}}
+
 " Replace() ------------------ {{{
 function! Replace()
     execute(':silent! %s/\<super\>/base/g')
@@ -5,10 +19,14 @@ function! Replace()
     execute(':silent! %s/\<toList\>/ToList/g')
     execute(':silent! %s/\<String\>/string/g')
     execute(':silent! %s/\<toString\>/ToString/g')
+    execute(':silent! %s/\<toStringAsFixed(1)/ToString("0.0")/g')
+    execute(':silent! %s/\<toStringAsFixed(2)/ToString("0.00")/g')
     execute(':silent! %s/\<extends\>/:/')
+    execute(':silent! %s/\<checked\>/isChecked/')
     execute(':silent! %s/\<double\>/float/g')
     execute(':silent! %s/\<DoubleProperty\>/FloatProperty/g')
     execute(':silent! %s/\<lerpDouble\>/MathUtils.lerpFloat/g')
+    execute(':silent! %s/\<Matrix4\>/Matrix3/g')
     execute(':silent! %s/\<math\.max\>/Mathf.Max/g')
     execute(':silent! %s/\<math\.min\>/Mathf.Min/g')
     execute(':silent! %s/\<math\.asin\>/Mathf.Asin/g')
@@ -23,9 +41,10 @@ function! Replace()
     execute(':silent! %s/\<Iterable\>/IEnumerable/g')
     execute(':silent! %s/\<EdgeInsetsGeometry\>/EdgeInsets/g')
     execute(':silent! %s/\<static const\>/const/g')
-    execute(':silent! %s/\<ValueKey<\w\+>\zs\ze(/.key/g')
+    execute(':silent! %s/^\s*@immutable\s*$\n//')
+    execute(':silent! %s/^\s*typedef \(\w\+\) = \(' . s:typenamePattern . '\) Function\ze(/public delegate \2 \1/')
     execute(':silent! %s/\<TextAlign.start\>/TextAlign.left/g')
-    execute(':silent! %s/((\w\+ \w\+)\zs\ze {/ =>/g')
+    execute(':silent! %s/\([(:=]\|^\s*\)\s*(\w\+ \w\+\(\s*,\s*\w\+ \w\+\)*)\zs\ze {/ =>/g')
     execute(':silent! %s/\<float.infinity\>/float\.PositiveInfinity/g')
     execute(':silent! %s/([^.]\zs\ze\(debugCheckHasMaterialLocalizations\|debugCheckHasMaterial\)\>/MaterialD./g')
     execute(':silent! %s/\.isNotEmpty\zs\ze[^(])/()/g')
@@ -39,6 +58,8 @@ function! Replace()
     execute(':silent! %s/\.\zscontains\ze(/Contains/g')
     execute(':silent! %s/\(properties\|description\)\@<!\.\zsadd\ze(/Add/g')
     execute(':silent! %s/\.\zsremove\ze(/Remove/g')
+    execute(':silent! %s/\.\zsaddAll\ze(/AddRange/g')
+    execute(':silent! %s/\.\zsany\ze(/Any/g')
     execute(':silent! %s/\.\zstoUpperCase\ze()/ToUpper/g')
     execute(':silent! %s/([^.]\zs\zedebugCheckHasDirectionality\>/WidgetsD./g')
     execute(':silent! %s/\<\(EdgeInsets\|Alignment\)Directional\>/\1/g')
@@ -51,11 +72,12 @@ function! Replace()
     execute(':silent! %s/^\s*\zsclass \(\a\+\)\ze\>/public class \1')
     execute(':silent! %s/^\s*\zs\zeabstract class \a\+\>/public ')
     execute(':silent! %s/@override\n\s*/public override /')
+    execute(':silent! %s/^\s*\zsstatic final\ze/public static')
     execute(':silent! %s/^\s*\zsfinal \(\S\+\) \(\w\+\)\ze;$/public readonly \1 \2')
     execute(':silent! %s/^\s*\zs\<final\> \ze//')
     execute(':silent! %s/^\s*\<public override\zs final\ze\>//')
     execute(':silent! %s/^\s*\/\/.*$\n//')
-    execute(':silent! %s/\(\d\+\.\d\+\)\>/\1f/g')
+    execute(':silent! %s/\(\d\+\.\d\+\)\>\ze[^"]/\1f/g')
     execute(':silent! %s/const \(\w\+\)({/public \1(')
     execute(':silent! %s/}) : /) : ')
     execute(':silent! %s/\zsconst \ze\w\+\.\w\+(//')
@@ -78,9 +100,10 @@ function! Replace()
     execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(axisDirection\),$/AxisDirection /')
     execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\ze\(alignment\),$/Alignment /')
     execute(':silent! %s/^\s*D.assert(.*)\zs,\ze$/;/')
-    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
-    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
-    execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\|Color\)\(<[^>]*>\)\?(/new /g')
+    execute(':silent! %s/[:=(] \?\zs\ze\(_\?[A-Z]\w\+\)\(<[^>]*>\)\?(/new /g')
+    " execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(FloatTween\|AnimationController\|ColorTween\|CurveTween\|NotificationListener\|TimeSpan\|EnumProperty\|MessageProperty\|DiagnosticsProperty\|CurvedAnimation\|LayoutId\|CustomMultiChildLayout\|InkWell\|FloatProperty\|SliverGeometry\)\(<[^>]*>\)\?(/new /g')
+    " execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Offset\|Alignment\|BoxDecoration\|LinearGradient\|Container\|AppBar\|TextStyle\|Border\|BorderSide\|FloatingActionButton\|Icon\|TabController\)\(<[^>]*>\)\?(/new /g')
+    " execute(':silent! %s/\([:=(]\|^\s*\) \?\zs\ze\(Wrap\|Text\|ShapeDecoration\|DefaultTextStyle\|AnimatedSwitcher\|Center\|DecorationImage\|BoxConstraints\|Color\)\(<[^>]*>\)\?(/new /g')
     execute(':silent! %s/: (.*)\zs\ze {$/ =>')
     execute(':silent! %s/State<\(\w\+\)> with SingleTickerProviderStateMixin/SingleTickerProviderStateMixin<\1>/')
     execute(':silent! %s/^\s*public override \zs\w\+\ze createRenderObject(BuildContext context) {/RenderObject')
@@ -89,19 +112,8 @@ function! Replace()
     execute(':silent! %s/= GlobalKey<\w\+>\zs\ze()/.key')
     execute(':silent! %s/= \zs\ze<[a-zA-Z_<>]\+, [a-zA-Z_<>]\+>\s*{/new Dictionary')
     execute(':silent! %s/^\s*[a-zA-Z_<>]\+ \zsget \(\w\+\);\ze$/\1 { get; }')
+    execute(':silent! %s/^\s*\zsfor\ze\s*(\s*' . s:typenamePattern . '\s*\w\+\s*in\s*\w\+\s*)/foreach')
 endfunction
-" }}}
-
-" Patterns --------------- {{{
-let s:typenamePattern = '[0-9a-zA-Z_<>,]\+'
-let s:assignmentPattern = '= [0-9a-zA-Z_.(),]\+'
-let s:functionParamDeclPattern = '\(' . s:typenamePattern . ' \|this.\)\w\+'
-let s:functionParamPattern = s:functionParamDeclPattern . '\( ' . s:assignmentPattern . '\)\?'
-let s:functionParamListPattern = '\(\(\s*' . s:functionParamPattern . ',\n\?\)*\(\s*' . s:functionParamPattern . '\n\?\)\)\?'
-let s:functionModifierPattern = '\(public \|private \|protected \)\?\(static \|override \)\?'
-let s:functionHeaderPattern = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\n\?' . s:functionParamListPattern . '\s*)\s*{'
-let s:functionHeaderWithOpenBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+(\zs{\ze\n\?' . s:functionParamListPattern . '\s*}\?)\s*{'
-let s:functionHeaderWithCloseBrace = '^\s*' . s:functionModifierPattern . s:typenamePattern . '\s\+\w\+({\?\n\?' . s:functionParamListPattern . '\s*\zs}\ze)\s*{'
 " }}}
 
 " AddUtil() ------------------ {{{
@@ -121,6 +133,14 @@ function! ClearBraces()
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>x")
     endwhile
+    let pattern = s:constructorHeaderWithOpenBrace
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "\<cr>x")
+    endwhile
+    let pattern = s:constructorHeaderWithCloseBrace
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "\<cr>x")
+    endwhile
     " let pattern = '\(^\s*public \w\+({\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+(\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+({\n\([^)]\+\n\)*\s*)\)'
     " while search(pattern) != 0
     "     execute(":normal! gg/" . pattern . "\<cr>")
@@ -133,7 +153,7 @@ endfunction
 
 " ClearBase() ------------------ {{{
 function! ClearBase()
-    let pattern = ':\(\s*\(D.assert(.*)\|\w\+ = \w\+\)\(,\|;\)\n\)\+\s*base(.*);$'
+    let pattern = ':\(\s*\(D.assert(.*)\|\w\+ = .\+\)\(,\|;\)\n\)\+\s*base(.*);$'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>/base(.*);\<cr>dt;mq?:\<cr>a \<esc>pla{\<cr>\<esc>`qs}\<esc>")
     endwhile
@@ -150,6 +170,10 @@ function! AddBrace()
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
     endwhile
+    let pattern = 'public \w\+([^:;{}]*);'
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
+    endwhile
     let pattern = ') : base(.*);$'
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "/e\<cr>s {\<cr>}\<esc>")
@@ -159,18 +183,30 @@ endfunction
 
 " PublicConstructor() ------------------ {{{
 function! PublicConstructor()
-    let pattern = '^\s*class.*{\n\s*\w\+('
+    let pattern = '^\s*\(public\s*\)\?class.*{\n\s*\w\+('
     while search(pattern) != 0
         execute(":normal! gg/" . pattern . "\<cr>jwipublic \<esc>")
     endwhile
 endfunction
 " }}}
 
+" BreakLongConstructor() ------------------ {{{
+function! BreakLongConstructor()
+    let pattern = '^\s*\(public\s*\)\?class.*{\n\s*\(public\s*\)\?\w\+(\zs\ze.*)\(;\| {\)$'
+    while search(pattern) != 0
+        execute(":normal! gg/" . pattern . "\<cr>i\<cr>\<esc>$F)i\<cr>\<esc>k")
+        execute(':silent! s/,\zs \zethis/\r/g')
+    endwhile
+endfunction
+" }}}
+
 " Getters() ------------------ {{{
 function! Getters()
-    let pattern = '^\s*\w\+ get \w\+ => .\+;'
+    let pattern = '^\s*\(public\s*\)\?\(override\s*\)\?\w\+ get \w\+ => .\+;'
     while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>ipublic \<esc>/" . '\<get' . "\<cr>dwwxxxi{\<cr>get {\<cr>return \<esc>o}\<cr>}\<esc>")
+        execute(":normal! gg/" . pattern . "\<cr>")
+        execute(':silent! s/^\s*\zspublic\ze//')
+        execute(":normal! ipublic \<esc>/" . '\<get' . "\<cr>dwwxxxi{\<cr>get {\<cr>return \<esc>o}\<cr>}\<esc>")
     endwhile
     let pattern = '^\s*@override \w\+ get \w\+ => .\+;'
     while search(pattern) != 0
@@ -215,7 +251,20 @@ function! ClearRequired()
     endwhile
 endfunction
 " }}}
-"
+
+" InterpolateString() ----------------- {{{
+function! InterpolateString()
+    let pattern = '[^$]"[^\\"]*\zs\$\ze{[^\\"]*"'
+    while  search(pattern) !=# 0
+        execute(":normal! gg/" . pattern . "\<cr>xF\"i$\<esc>")
+    endwhile
+    let pattern = '\$"[^\\"]*\zs\$\ze{[^\\"]*"'
+    while  search(pattern) !=# 0
+        execute(":normal! gg/" . pattern . "\<cr>x")
+    endwhile
+endfunction
+" }}}
+
 " ClearComma() ------------------ {{{
 function! ClearComma()
     try
@@ -247,7 +296,7 @@ endfunction
 
 " ClearThis() ------------------ {{{
 function! ClearThis()
-    let pattern = '^\s*public \w\+(\n\([^:;{}]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^:;{}]*\n\)*\s*)'
+    let pattern = '^\s*public \w\+({\?\n\([^:;{}]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^:;{}]*\n\)*\s*}\?)'
     while search(pattern) !=# 0
         execute(":normal! gg/" . pattern . "\<cr>")
         let word = expand("<cword>")
@@ -333,6 +382,8 @@ function! AddSet()
 endfunction
 " }}}
 
+    
+
 " CorrectDictionaryPair() ------------------ {{{
 function! CorrectDictionaryPair()
     execute(':silent! s/:/,')
@@ -378,7 +429,7 @@ endfunction
 " Initialize() ------------------ {{{
 function! Initialize()
     execute(":normal! g'<yg'>/}\<cr>kpV/}\<cr>k\<esc>")
-    execute(":'<,'>" . 's/^\s*\zs\S\+\s\+\(\w\+\)\s*=.*\ze/this.\1 = \1;')
+    execute(":'<,'>" . 's/^\s*\zs\S\+\s\+\(\w\+\)\s*\(=.*\)\?,\?\ze/this.\1 = \1;')
 endfunction
 " }}}
 
@@ -400,6 +451,7 @@ endfunction
 function! Move()
     call ClearBase()
     call PublicConstructor()
+    call BreakLongConstructor()
     call ClearBraces()
     call Getters()
     call Setters()
@@ -411,6 +463,7 @@ function! Move()
     call GetHashCode()
     call ClearConcatString()
     call AddSet()
+    call InterpolateString()
 endfunction
 " }}}
 
