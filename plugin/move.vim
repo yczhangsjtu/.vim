@@ -22,11 +22,14 @@ function! Replace()
     execute(':silent! %s/\<toStringAsFixed(1)/ToString("0.0")/g')
     execute(':silent! %s/\<toStringAsFixed(2)/ToString("0.00")/g')
     execute(':silent! %s/\<extends\>/:/')
+    execute(':silent! %s/\<typedef\>/public delegate/')
     execute(':silent! %s/\<checked\>/isChecked/')
     execute(':silent! %s/\<double\>/float/g')
     execute(':silent! %s/\<DoubleProperty\>/FloatProperty/g')
     execute(':silent! %s/\<lerpDouble\>/MathUtils.lerpFloat/g')
     execute(':silent! %s/\<Matrix4\>/Matrix3/g')
+    execute(':silent! %s/\<num\>/int/g')
+    execute(':silent! %s/\<event\>/evt/g')
     execute(':silent! %s/\<math\.max\>/Mathf.Max/g')
     execute(':silent! %s/\<math\.min\>/Mathf.Min/g')
     execute(':silent! %s/\<math\.asin\>/Mathf.Asin/g')
@@ -78,8 +81,7 @@ function! Replace()
     execute(':silent! %s/^\s*\<public override\zs final\ze\>//')
     execute(':silent! %s/^\s*\/\/.*$\n//')
     execute(':silent! %s/\(\d\+\.\d\+\)\>\ze[^"]/\1f/g')
-    execute(':silent! %s/const \(\w\+\)({/public \1(')
-    execute(':silent! %s/}) : /) : ')
+    execute(':silent! %s/\zsconst\ze \w\+({/public')
     execute(':silent! %s/\zsconst \ze\w\+\.\w\+(//')
     execute(':silent! %s/: \zsconst\ze \w\+(/new')
     execute(':silent! %s/\(child:\|body:\|content:\|icon:\|return\) \zs\ze\(Equals\)\@!_\?[A-Z]\w*\(<\w\+>\)\?(/new /')
@@ -92,7 +94,6 @@ function! Replace()
     execute(':silent! %s/\zs,\ze\n\(\s*\)\]/')
     execute(':silent! %s/\(setState(\|onPressed: \|onTap:\)()\zs \ze{/ => /')
     execute(':silent! %s/\S\+ createState() => \(\S\+\)();$/State createState() => new \1();/')
-    execute(':silent! %s/public \w\+(\([^)]\|\n\)*\zs}\ze);//')
     execute(':silent! %s/public \w\+(\([^)]\|\n\)*)\zs;\ze/ {}/')
     execute(':silent! %s/new List<\(\w\+\)>\[\([^]]*\)\]/new List<\1>{\2}/')
     execute(':silent! %s/^\s*\(@required\)\? \zsthis\.\zechild,$/Widget /')
@@ -113,6 +114,14 @@ function! Replace()
     execute(':silent! %s/= \zs\ze<[a-zA-Z_<>]\+, [a-zA-Z_<>]\+>\s*{/new Dictionary')
     execute(':silent! %s/^\s*[a-zA-Z_<>]\+ \zsget \(\w\+\);\ze$/\1 { get; }')
     execute(':silent! %s/^\s*\zsfor\ze\s*(\s*' . s:typenamePattern . '\s*\w\+\s*in\s*\w\+\s*)/foreach')
+    call ClearBase()
+    execute(':silent! %s/' . '\<class \(\w\+\)\_.\{-}\n\s*\zs\1\ze(' . '/public \1')
+    execute(':silent! %s/' . '\<class \(\w\+\)\_.\{-}\n\s*\zsfactory \1\.\(\w\+\)\ze(' . '/public static \1 \2')
+    execute(':silent! %s/' . '\<class \(\w\+\)\_.\{-}\n\s*public \1\s*(\_s*\zs{\(\_[^}]\{-}\)}\ze\_s*)' . '/\2')
+    execute(':silent! %s/' . '\<class \(\w\+\)\_.\{-}\n\s*public static \1 .*(\_s*\zs{\(\_[^}]\{-}\)}\ze\_s*)' . '/\2')
+    call ClearThis()
+    execute(':silent! %s/' . '@required ' . '//')
+    execute(':silent! %s/^\s*' . s:typenamePattern . ' \a\+\zs\s*:\ze' . '/ =')
 endfunction
 " }}}
 
@@ -124,39 +133,47 @@ endfunction
 " }}}
 
 " ClearBraces() ------------------ {{{
-function! ClearBraces()
-    let pattern = s:functionHeaderWithOpenBrace
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>x")
-    endwhile
-    let pattern = s:functionHeaderWithCloseBrace
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>x")
-    endwhile
-    let pattern = s:constructorHeaderWithOpenBrace
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>x")
-    endwhile
-    let pattern = s:constructorHeaderWithCloseBrace
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>x")
-    endwhile
-    " let pattern = '\(^\s*public \w\+({\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+(\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+({\n\([^)]\+\n\)*\s*)\)'
-    " while search(pattern) != 0
-    "     execute(":normal! gg/" . pattern . "\<cr>")
-    "     execute(":s/{//")
-    "     execute(":normal! %")
-    "     execute(":s/}//")
-    " endwhile
-endfunction
+" function! ClearBraces()
+"     let pattern = s:functionHeaderWithOpenBrace
+"     while search(pattern) != 0
+"         execute(":normal! gg/" . pattern . "\<cr>x")
+"     endwhile
+"     let pattern = s:functionHeaderWithCloseBrace
+"     while search(pattern) != 0
+"         execute(":normal! gg/" . pattern . "\<cr>x")
+"     endwhile
+"     let pattern = s:constructorHeaderWithOpenBrace
+"     while search(pattern) != 0
+"         execute(":normal! gg/" . pattern . "\<cr>x")
+"     endwhile
+"     let pattern = s:constructorHeaderWithCloseBrace
+"     while search(pattern) != 0
+"         execute(":normal! gg/" . pattern . "\<cr>x")
+"     endwhile
+"     " let pattern = '\(^\s*public \w\+({\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+(\n\([^)]\+\n\)*\s*})\)\|\(^\s*public \w\+({\n\([^)]\+\n\)*\s*)\)'
+"     " while search(pattern) != 0
+"     "     execute(":normal! gg/" . pattern . "\<cr>")
+"     "     execute(":s/{//")
+"     "     execute(":normal! %")
+"     "     execute(":s/}//")
+"     " endwhile
+" endfunction
 " }}}
 
 " ClearBase() ------------------ {{{
 function! ClearBase()
-    let pattern = ':\(\s*\(D.assert(.*)\|\w\+ = .\+\)\(,\|;\)\n\)\+\s*base(.*);$'
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>/base(.*);\<cr>dt;mq?:\<cr>a \<esc>pla{\<cr>\<esc>`qs}\<esc>")
-    endwhile
+    let pattern = ':\zs\s*'
+        \ .'\('
+        \ .  '\%('
+        \ .     '\%('
+        \ .         '\s*D.assert(.*)'
+        \ .         '\|\s*\%(this\.\)\?\w\+ =\_.\{-1,}'
+        \ .     '\)'
+        \ .     '\%(,\|;\)\n'
+        \ .  '\)\{-}'
+        \ .'\)'
+        \ .'\s*\(base(\_[^{]\{-})\);\ze$'
+    execute(':silent! %s/' . pattern . '/ \2 {\r\1\r}')
 endfunction
 " }}}
 
@@ -181,14 +198,6 @@ function! AddBrace()
 endfunction
 " }}}
 
-" PublicConstructor() ------------------ {{{
-function! PublicConstructor()
-    let pattern = '^\s*\(public\s*\)\?class.*{\n\s*\w\+('
-    while search(pattern) != 0
-        execute(":normal! gg/" . pattern . "\<cr>jwipublic \<esc>")
-    endwhile
-endfunction
-" }}}
 
 " BreakLongConstructor() ------------------ {{{
 function! BreakLongConstructor()
@@ -296,15 +305,13 @@ endfunction
 
 " ClearThis() ------------------ {{{
 function! ClearThis()
-    let pattern = '^\s*public \w\+({\?\n\([^:;{}]*\n\)*\s*this.\zs\w\+\ze\( = .*\)\?,\?\n\([^:;{}]*\n\)*\s*}\?)'
+    let pattern = '\<class \(\w\+\)\_.\{-}\n\s*public \1\s*(\_s*\_[^{}]\{-}\<\zsthis\.\ze\(\a\+\)\>,\_[^{}]\{-}\_s*)\_.\{-}public readonly \(' . s:typenamePattern . '\) \2'
     while search(pattern) !=# 0
-        execute(":normal! gg/" . pattern . "\<cr>")
-        let word = expand("<cword>")
-        let newpattern = '^\s*public \(readonly \)\?\zs\S\+\ze ' . word . ';'
-        execute(":normal! gg/" . newpattern . "\<cr>")
-        let type = expand("<cWORD>")
-        execute(":normal! gg/" . pattern . "\<cr>")
-        execute(':silent! s/\<this\>\./' . type . " ")
+        execute(':silent! %s/' . pattern . '/\3 ')
+    endwhile
+    let pattern = '\<class \(\w\+\)\_.\{-}public readonly \(' . s:typenamePattern . '\) \(\a\+\)\_.\{-}\n\s*public \1\s*(\_s*\_[^{}]\{-}\<\zsthis\.\ze\3\>\_s*\%([,=:]\_[^{}]\{-}\_s*\)\?)'
+    while search(pattern) !=# 0
+        execute(':silent! %s/' . pattern . '/\2 ')
     endwhile
 endfunction
 " }}}
@@ -449,17 +456,14 @@ endfunction
 
 " Move() ------------------ {{{
 function! Move()
-    call ClearBase()
-    call PublicConstructor()
-    call BreakLongConstructor()
-    call ClearBraces()
+    " call ClearBase()
+    " call BreakLongConstructor()
     call Getters()
     call Setters()
-    call AddBrace()
-    call ClearRequired()
+    " call AddBrace()
+    " call ClearRequired()
     call ClearComma()
     call ClearDoubleDots()
-    call ClearThis()
     call GetHashCode()
     call ClearConcatString()
     call AddSet()
