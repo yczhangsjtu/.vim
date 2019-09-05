@@ -25,9 +25,11 @@ noremap - ddp
 inoremap <c-u> <esc>viwUA
 nnoremap <c-u> viwU
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-nnoremap <leader>em :vsplit ~/.vim/plugin/move.vim<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
-nnoremap <leader>sm :source ~/.vim/plugin/move.vim<cr>
+nnoremap <leader>et :vsplit ~/.vim/plugin/transpiler.vim<cr>
+nnoremap <leader>st :source ~/.vim/plugin/transpiler.vim<cr>
+nnoremap <leader>eu :vsplit ~/.vim/plugin/uiwidgets.vim<cr>
+nnoremap <leader>su :source ~/.vim/plugin/uiwidgets.vim<cr>
 nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
 nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
 vnoremap " <esc>`>a"<esc>`<i"<esc>
