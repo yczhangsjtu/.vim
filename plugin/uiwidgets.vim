@@ -12,3 +12,5 @@ function! ExpandStatefulWidget()
     \ ."}\<cr>"
     \ ."}\<esc>")
 endfunction
+
+nnoremap <leader>ust :call ExpandStatefulWidget()
